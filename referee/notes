@@ -1,0 +1,19 @@
+python -m referee agent agent
+
+python -m referee <red module> <blue module>
+
+COMMENT: ASDF
+
+### NOTES
+- i want to be able to have the algorithm know the spread action. like, how itll verify the move. ik how to do it manually but how do i do it  with the referee in mind?
+- find a way to copy the entire board as it is
+- how to ensure non-illegal moves? we do the logic ourselves? i think we use the exceptions but not too sure how to run those without returning a modification to the board
+- playout policy could be doing semi-random moves(?) definitely not ideal but idk how we'd decide which moves are best
+
+### OPTIMISATIONS
+- MCTS calculations start from current state of board
+- but what if the current state and some future states were already found before? couldn't we optimise it by using the old calculations and going from there? or does the thingy keep the info from last computation?? probably does
+
+### USEFUL CODE
+- "HexPos(r,q).__add__(HexDir.Location)" returns the Hex of neighbours. I think this includes mapping as well
+    - could be used on GetNeighbours
