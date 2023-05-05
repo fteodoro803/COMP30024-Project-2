@@ -12,14 +12,10 @@ from agent.gameboard import GameBoard
 # intended to serve as an example of how to use the referee API -- obviously
 # this is not a valid strategy for actually playing the game!
 
-class Node:
-    def __init__(self):
-        self.children = {}
-
 class Agent:
     # STATIC VARIABLES
-    testBoard = board.Board() #  ASDF arbitrary rn
-    testCounter = 0 # ASDF test
+    testBoard = GameBoard()
+    testTurnCounter = 1 # ASDF test
 
     def __init__(self, color: PlayerColor, **referee: dict):
         """
@@ -36,68 +32,78 @@ class Agent:
         """
         Return the next action to take.
         """
-        match self._color:
-            case PlayerColor.RED:
-                return SpawnAction(HexPos(3, 3))
-            case PlayerColor.BLUE:
-                # This is going to be invalid... BLUE never spawned!
-                return SpawnAction(HexPos(3, 3))
 
-        #return SpawnAction(self.randomSpawn())
+        # Random Spread
+        match Agent.testTurnCounter:
+            case 1:
+                return SpawnAction(HexPos(0, 0))
+            case 2:
+                return SpawnAction(HexPos(3, 3))
+            case 3:
+                return SpawnAction(HexPos(0, 1))
+            case 4:
+                return SpawnAction(HexPos(3, 4))
+            case _:
+                location, direction = self.randomSpread()
+                print(location, direction)
+                return SpreadAction(location, direction)
 
-        # match Agent.testCounter:
-        #     case 0:  # red turn 1
-        #         Agent.testBoard.apply_action(SpawnAction(HexPos(0, 0)))
-        #         return SpawnAction(HexPos(0,0))
-        #     case 1:  # blue turn 1
-        #         Agent.testBoard.apply_action(SpawnAction(HexPos(3, 3)))
-        #         return SpawnAction(HexPos(3,3))
-        #     case 2:
-        #         # testCoords = HexPos(0, 0)
-        #         # print(f"\tSPREAD: {SpreadAction(testCoords, HexDir.Up).cell}")
-        #         # print(f"\t({testCoords}) --> ({testCoords.__add__(HexDir.Up)})")
-        #         # return SpreadAction(HexPos(0,0), HexDir.Up)
+        # # Random Spawn
+        # location = self.randomSpawn()
         #
-        #         return SpawnAction(HexPos(0,1))
-        #     case 3:
-        #         return SpawnAction(HexPos(3,4))
-        #     case 4:
-        #         testCoords = HexPos(0,1)
-        #         print(f"\tSPREAD: {SpreadAction(testCoords, HexDir.UpLeft).cell}")
-        #         print(f"\t({testCoords}) --> ({testCoords.__add__(HexDir.UpLeft)})")
-        #         return SpreadAction(HexPos(0,1), HexDir.UpLeft)
-        #     case 5:
-        #         return SpawnAction(HexPos(3,5))
-        #     case 6:
-        #         testCoords = HexPos(0,0)
-        #         print(f"\tSPREAD: {SpreadAction(testCoords, HexDir.Up).cell}")
-        #         print(f"\t({testCoords}) --> ({testCoords.__add__(HexDir.Up)})")
-        #         return SpreadAction(HexPos(0,0), HexDir.Up)
-        #     case 7: # intentional exception test
-        #         self.testBoard.
-        #     case _:  # else
-        #         # print(f"\tAT (1,6): {HexPos.}")
-        #         return SpawnAction(HexPos(0,0))  # intentional failure
+        # # Random Spread at end
+        # if self.testTurnCounter == 49:
+        #     return SpreadAction()
+        #
+        # return SpawnAction(location)
+
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
         """
         Update the agent with the last player's action.
         """
-        print(f"\t\t\tACTION NUMBER: {Agent.testCounter}")
-        Agent.testCounter += 1
+        # print(f"\t\t\tACTION NUMBER: {Agent.testTurnCounter}")
+        # print(Agent.testBoard.board)
+        Agent.testTurnCounter += 1
 
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")
                 # update the board here bc it's already been tested by this point, so it's valid
-                pass
+                Agent.testBoard.updateBoard(color, action)
+
+                # pass
             case SpreadAction(cell, direction):
                 print(f"Testing: {color} SPREAD from {cell}, {direction}")
                 # update the board here bc it's already been tested by this point, so it's valid
-                pass
+                Agent.testBoard.updateBoard(color, action)
 
+                # pass
 
-    def randomSpawn(self): # testing spawn
-        randomR = random.randint(0, constants.BOARD_N-1)
-        randomQ = random.randint(0, constants.BOARD_N-1)
-        return HexPos(randomR, randomQ)
+    def randomSpawn(self) -> HexPos:
+        # get Locations where Board is empty
+        emptyLocations = [key for key, value in Agent.testBoard.board.items() if value.colour is None]  # https://note.nkmk.me/en/python-dict-get-key-from-value/
+
+        if not emptyLocations:
+            return HexPos(0, 0)  # intentionally wrong. no more valid spaces
+
+        randomLocation = emptyLocations[random.randint(0, len(emptyLocations)-1)]  # gets random location from empty location list
+
+        return HexPos(randomLocation[0], randomLocation[1])
+
+    def randomSpread(self) -> (HexPos, HexDir):
+        # get Locations of current Player
+        locations = [key for key, value in Agent.testBoard.board.items() if value.colour is self._color]
+        # print(locations)
+
+        # choose random Location to Move
+        randomLocation = locations[random.randint(0, len(locations)-1)]  # gets random location from empty location list
+        # print(randomLocation)
+
+        # choose random Direction
+        randomDirection = random.choice(list(HexDir))
+        # print(randomDirection)
+
+        randomHex = HexPos(randomLocation[0], randomLocation[1])
+
+        return randomHex, randomDirection
