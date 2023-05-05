@@ -35,31 +35,32 @@ class Agent:
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
 
         # Random Spread
-        match Agent.testTurnCounter:
-            case 1:
-                return SpawnAction(HexPos(0, 0))
-            case 2:
-                return SpawnAction(HexPos(3, 3))
-            case 3:
-                return SpawnAction(HexPos(0, 1))
-            case 4:
-                return SpawnAction(HexPos(3, 4))
-            case 5:
-                return SpreadAction(HexPos(0,1), HexDir.UpLeft)
+        # match Agent.testTurnCounter:
+        #     case 1:
+        #         return SpawnAction(HexPos(0, 0))
+        #     case 2:
+        #         return SpawnAction(HexPos(3, 3))
+        #     case 3:
+        #         return SpawnAction(HexPos(0, 1))
+        #     case 4:
+        #         return SpawnAction(HexPos(3, 4))
+        #     case 5:
+        #         return SpreadAction(HexPos(0,1), HexDir.UpLeft)
             # case _:
             #     location, direction = self.randomSpread()
             #     print(location, direction)
             #     print(SpreadAction(location, direction))
             #     return SpreadAction(location, direction)
 
-        # # Random Spawn
-        # location = self.randomSpawn()
-        #
-        # # Random Spread at end
-        # if self.testTurnCounter == 49:
-        #     return SpreadAction()
-        #
-        # return SpawnAction(location)
+        # Random Spawn
+        location = self.randomSpawn()
+
+        # Random Spread at end
+        if self.testTurnCounter >= 49:
+            location, direction = self.randomSpread()
+            return SpreadAction(location, direction)
+
+        return SpawnAction(location)
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
