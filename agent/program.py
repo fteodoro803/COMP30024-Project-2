@@ -32,6 +32,7 @@ class Agent:
         """
         Return the next action to take.
         """
+        print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
 
         # Random Spread
         match Agent.testTurnCounter:
@@ -43,10 +44,13 @@ class Agent:
                 return SpawnAction(HexPos(0, 1))
             case 4:
                 return SpawnAction(HexPos(3, 4))
-            case _:
-                location, direction = self.randomSpread()
-                print(location, direction)
-                return SpreadAction(location, direction)
+            case 5:
+                return SpreadAction(HexPos(0,1), HexDir.UpLeft)
+            # case _:
+            #     location, direction = self.randomSpread()
+            #     print(location, direction)
+            #     print(SpreadAction(location, direction))
+            #     return SpreadAction(location, direction)
 
         # # Random Spawn
         # location = self.randomSpawn()
@@ -62,10 +66,6 @@ class Agent:
         """
         Update the agent with the last player's action.
         """
-        # print(f"\t\t\tACTION NUMBER: {Agent.testTurnCounter}")
-        # print(Agent.testBoard.board)
-        Agent.testTurnCounter += 1
-
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")
@@ -79,6 +79,10 @@ class Agent:
                 Agent.testBoard.updateBoard(color, action)
 
                 # pass
+
+        # Test Prints
+        print(Agent.testBoard.board)  # our representation of the board
+        Agent.testTurnCounter += 1
 
     def randomSpawn(self) -> HexPos:
         # get Locations where Board is empty

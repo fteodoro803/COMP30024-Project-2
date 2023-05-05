@@ -26,10 +26,23 @@ class GameBoard:
             case SpawnAction(cell):
                 self.board[location] = Node(hexLocation, colour, 1)
             case SpreadAction(cell, direction):
-                # remove root
-                # self.board[location] = Node(hexLocation, None, 0)  # Placeholder/Empty Locations
+                # gets successive locations
+                current = self.board[location]  # Node
+                nextHexLocation = hexLocation.__add__(action.direction)  # Neighbour Hex Location
 
-                pass
+                for i in range(current.power):
+                    nextCoordinate = (nextHexLocation.r, nextHexLocation.q)  # Neighbour Coordinate
+                    temp = self.board[nextCoordinate]
+
+                    nextNode = Node(HexPos(temp.location.r, temp.location.q), colour, temp.power + 1)
+                    self.board[nextCoordinate] = nextNode
+
+                    # continues Spread to next neighbour
+                    nextHexLocation = nextNode.location.__add__(action.direction)
+
+                # remove root
+                self.board[location] = Node(hexLocation, None, 0)  # Placeholder/Empty Locations
+
 
     def generateBoard(self):
         gameBoard = {}
