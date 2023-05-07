@@ -33,7 +33,8 @@ class Agent:
         Return the next action to take.
         """
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
-
+        time = referee["time_remaining"]
+        print(referee['time_remaining'])
         # Random Spawn and Spread Together
         location = self.randomSpawn()
         if self.testTurnCounter >= 50:  # Random Spread at end
@@ -46,6 +47,7 @@ class Agent:
         """
         Update the agent with the last player's action.
         """
+
         match action:
             case SpawnAction(cell):
                 print(f"Testing: {color} SPAWN at {cell}")

@@ -1,7 +1,7 @@
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir, constants, exceptions, board
 
-class Node:
+class Piece:
     def __init__(self, location: HexPos, colour: PlayerColor, power: int):
         self.location = location
         self.colour = colour
@@ -25,7 +25,7 @@ class GameBoard:
 
         match action:
             case SpawnAction(cell):
-                self.board[location] = Node(hexLocation, colour, 1)
+                self.board[location] = Piece(hexLocation, colour, 1)
                 self.power += 1
             case SpreadAction(cell, direction):
                 # gets successive locations
@@ -33,17 +33,17 @@ class GameBoard:
                 nextHexLocation = hexLocation.__add__(action.direction)  # Neighbour Hex Location
 
                 # remove root
-                self.board[location] = Node(hexLocation, None, 0)  # Placeholder/Empty Locations
+                self.board[location] = Piece(hexLocation, None, 0)  # Placeholder/Empty Locations
 
                 for i in range(current.power):  # should this be minus 1? in the case the power is more than one?
                     nextCoordinate = (nextHexLocation.r, nextHexLocation.q)  # Neighbour Coordinate
                     temp = self.board[nextCoordinate]
 
-                    nextNode = Node(HexPos(temp.location.r, temp.location.q), colour, temp.power + 1)
+                    nextNode = Piece(HexPos(temp.location.r, temp.location.q), colour, temp.power + 1)
                     if nextNode.power < 7:  # assigning if power <= 6
                         self.board[nextCoordinate] = nextNode
                     else:  # remove stack if power > 6
-                        nextNode = Node(HexPos(nextNode.location.r, nextNode.location.q), None, 0)
+                        nextNode = Piece(HexPos(nextNode.location.r, nextNode.location.q), None, 0)
                         self.board[nextCoordinate] = nextNode
 
 
@@ -60,6 +60,8 @@ class GameBoard:
             for q in range(constants.BOARD_N):
                 location = (r, q)
                 hexLocation = HexPos(r, q)
-                gameBoard[(r, q)] = Node(hexLocation, None, 0)  # Placeholder/Empty Locations
+                gameBoard[(r, q)] = Piece(hexLocation, None, 0)  # Placeholder/Empty Locations
 
         return gameBoard
+
+    # def isTerminal(self):
