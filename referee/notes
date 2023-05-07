@@ -9,6 +9,7 @@ COMMENT: ASDF
 - find a way to copy the entire board as it is
 - how to ensure non-illegal moves? we do the logic ourselves? i think we use the exceptions but not too sure how to run those without returning a modification to the board
 - playout policy could be doing semi-random moves(?) definitely not ideal but idk how we'd decide which moves are best
+- does my board spawn something (ie at power >49) when the referee wont? will it reflect??
 
 ### OPTIMISATIONS
 - MCTS calculations start from current state of board

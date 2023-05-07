@@ -34,32 +34,11 @@ class Agent:
         """
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
 
-        # Random Spread
-        # match Agent.testTurnCounter:
-        #     case 1:
-        #         return SpawnAction(HexPos(0, 0))
-        #     case 2:
-        #         return SpawnAction(HexPos(3, 3))
-        #     case 3:
-        #         return SpawnAction(HexPos(0, 1))
-        #     case 4:
-        #         return SpawnAction(HexPos(3, 4))
-        #     case 5:
-        #         return SpreadAction(HexPos(0,1), HexDir.UpLeft)
-            # case _:
-            #     location, direction = self.randomSpread()
-            #     print(location, direction)
-            #     print(SpreadAction(location, direction))
-            #     return SpreadAction(location, direction)
-
-        # Random Spawn
+        # Random Spawn and Spread Together
         location = self.randomSpawn()
-
-        # Random Spread at end
-        if self.testTurnCounter >= 49:
+        if self.testTurnCounter >= 50:  # Random Spread at end
             location, direction = self.randomSpread()
             return SpreadAction(location, direction)
-
         return SpawnAction(location)
 
 
@@ -82,7 +61,9 @@ class Agent:
                 # pass
 
         # Test Prints
-        print(Agent.testBoard.board)  # our representation of the board
+        #print(Agent.testBoard.board)  # our representation of the board
+        tiles = [(key, value) for key, value in Agent.testBoard.board.items() if value.colour is not None]  # printing locations with a colour on it
+        print(tiles)
         Agent.testTurnCounter += 1
 
     def randomSpawn(self) -> HexPos:
