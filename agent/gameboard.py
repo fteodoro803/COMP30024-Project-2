@@ -18,6 +18,7 @@ class GameBoard:
     def __init__(self):
         self.board = self.generateBoard()
         self.power = 0
+        self.numTurns = 0
 
     def updateBoard(self, colour: PlayerColor, action: Action):
         location = (action.cell.r, action.cell.q)
@@ -50,8 +51,8 @@ class GameBoard:
                     # continues Spread to next neighbour
                     nextHexLocation = nextNode.location.__add__(action.direction)
 
-
-        print(f"UpdateBoard: power={self.power}")
+        self.numTurns += 1
+        print(f"UpdateBoard: power={self.power}, moves={self.numTurns}")
 
 
     def generateBoard(self):
@@ -65,3 +66,27 @@ class GameBoard:
         return gameBoard
 
     # def isTerminal(self):
+
+    def getWinner(self):  # !!!!! this the same as isTerminal?
+        bluePower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.BLUE])
+        redPower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.RED])
+
+        # Winner in regular Gameplay
+        if bluePower == 0 and self.numTurns > 2:
+            return PlayerColor.RED
+        elif redPower == 0 and self.numTurns > 2:
+            return PlayerColor.BLUE
+
+        # No more Turns
+        if self.numTurns == 343:
+            if (abs(bluePower-redPower) >= 2):
+                if (bluePower > redPower):
+                    return PlayerColor.BLUE
+                else:
+                    return PlayerColor.RED
+
+        # No more Tokens
+        if redPower == 0 and bluePower == 0 and self.numTurns > 0:
+            return None
+
+        return None

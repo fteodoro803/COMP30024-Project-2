@@ -35,6 +35,7 @@ class Agent:
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
         time = referee["time_remaining"]
         print(referee['time_remaining'])
+        print(referee)
         # Random Spawn and Spread Together
         location = self.randomSpawn()
         if self.testTurnCounter >= 50:  # Random Spread at end
@@ -66,6 +67,7 @@ class Agent:
         #print(Agent.testBoard.board)  # our representation of the board
         tiles = [(key, value) for key, value in Agent.testBoard.board.items() if value.colour is not None]  # printing locations with a colour on it
         print(tiles)
+        print(Agent.testBoard.getWinner())
         Agent.testTurnCounter += 1
 
     def randomSpawn(self) -> HexPos:
