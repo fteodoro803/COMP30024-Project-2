@@ -4,7 +4,7 @@ import math
 import time
 import random
 
-from agent.gameboard import *
+from .gameboard import *
 
 class Node:
     def __init__(self, state: GameBoard, parent=None):
