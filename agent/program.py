@@ -34,24 +34,30 @@ class Agent:
         Return the next action to take.
         """
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
-        time = referee["time_remaining"]
         print(referee['time_remaining'])
         print(referee)
+        mcts = MCTS()
+        timeLimit = 1
+
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
         # if self.testTurnCounter >= 50:  # Random Spread at end
         #     location, direction = self.randomSpread()
         #     return SpreadAction(location, direction)
         # return SpawnAction(location)
-        mcts = MCTS()
-        if (Agent.testTurnCounter <= 6):
-            if Agent.testTurnCounter < 4:
+
+        if (Agent.testTurnCounter <= 343):
+            if (self._color == PlayerColor.RED and Agent.testTurnCounter < 8):
                 return SpawnAction(self.randomSpawn())
-            elif self._color == PlayerColor.RED:
-                bestMove = mcts.search(self.testBoard)
+            if self._color == PlayerColor.RED:
+                bestMove = mcts.search(self.testBoard, timeLimit)
                 return bestMove
-            else:
+            if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
                 return SpawnAction(self.randomSpawn())
+
+            else:
+                action = self.randomSpread()
+                return SpreadAction(action[0], action[1])
         else:
             return
 
@@ -109,3 +115,5 @@ class Agent:
         randomHex = HexPos(randomLocation[0], randomLocation[1])
 
         return randomHex, randomDirection
+
+

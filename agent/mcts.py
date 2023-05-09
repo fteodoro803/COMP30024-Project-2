@@ -1,175 +1,103 @@
 import copy
+import datetime
 import math
 import time
 import random
 
-from referee.game import HexDir
 from agent.gameboard import *
 
-
 class Node:
-    def __init__(self, board: GameBoard, parent, action):
+    def __init__(self, state: GameBoard, parent=None):
 
-        self.state = board
-        self.isTerminal = self.isFullyExpanded = self.state.getWinner()[0]
+        self.state = state
         self.parent = parent
-        self.playouts = 0
-        self.score = 0
-        self.children = {}
-        self.move = action
+        self.children = []
+        self.visits = 0
+        self.wins = 0
 
-class MCTS():
+    def update(self, result):
+        self.visits += 1
+        self.wins += result
 
-    def search(self, initialState) -> Action:
-        self.root = Node(initialState, None, None)
-        print(f"Board State (Start of MCTS): {self.root.state.board}")
+    def addChild(self, childState):
+        childNode = Node(childState, self)
+        self.children.append(childNode)
+        return childNode
 
-        for iteration in range(3):
-            node = self.select(self.root)
-            # print(node)
+    def isFullyExpanded(self):
+        return len(self.children) == len(self.state.getLegalMoves())
 
-            score = self.playout(node)
-            self.backpropagate(node, score)
+    def getBestChild(self):
+        choiceWeights = []
+        constant = 2
 
-        bestMove = self.getBestMove(self.root, 0)
-        print(f"bestMove: {bestMove}")
+        for child in self.children:
+            choiceWeights.append((child.wins / child.visits) + constant * math.sqrt((2 * math.log(self.visits) / child.visits)))
 
-        try:
-            return self.getBestMoves(self.root, 0)
+        return self.children[choiceWeights.index(max(choiceWeights))]
 
-        except:
-            pass
+    def rollout(self):  # random moves to get to the point
+        currentState = self.state
+        isTerminal = currentState.getWinner()[0]
+        winner = None
 
-        # return SpawnAction(HexPos(0,0))
+        # does Simulations while board's State is not Terminal
+        while not isTerminal:
+            possible_moves = currentState.getLegalMoves()
+            randomChoice = random.choice(possible_moves)
 
+            # for choice in possible_moves:    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! heuristic???
+            #     if choice.power > randomChoice.power:
+            #         randomChoice = choice
 
-    ### NODE SELECTION ###
-    def select(self, node: Node) -> Node:
-        while not node.state.getWinner()[0]:  # while there's no winner
-            if node.isFullyExpanded:
-                # print(f"NODE IS FULLY EXPANDED")
-                node = self.getBestMove(node, 2)  # asdf why is this 2
-            else:
-                self.expand(node)
-                # return self.expand(node)  # why is there even a return here? doesn't this cut the loop early?
+            currentState.updateBoard(randomChoice[0], randomChoice[1])
+            isTerminal = randomChoice[0]
+            winner = randomChoice[1]
 
-        return node
-        # if not node.isFullyExpanded and not node.isTerminal:
-        #     self.expand(node)
-        #
-        # print(f"NODE IS FULLY EXPANDED")
-        # bestNode = self.getBestMoves(node, 2)
-        #
-        # return bestNode
-
-    def expand(self, node: Node): #take player color into account
-        # states = node.state.generateMoves()
-
-
-        # get all the possible states of next player
-        states = self.getPossibleActions(node)  # GameBoards
-        # print(f"numStates={len(states)}, numChildren={len(node.children)}")
-
-        for state in states:
-            # print(f"\tnumChildren={len(node.children)}")
-            # print(f"\t(expand) currState={state}")
-            expandedState = state[0]
-            boardMove = state[1]
-            # print(f"\t(expand) expandedState={expandedState}")
-
-            if expandedState not in node.children:  # adds nodes to children
-                new_node = Node(state[0], node, state[1])
-                node.children[state[0]] = new_node
-
-                if len(states) == len(node.children):
-                    node.isFullyExpanded = True
-
-                return new_node  # why do we return one of the children nodes? if the goal of this function is to expand on the current node?
-
-        print("SOMETHING WENT HORRIBLY WRONG IF THIS PRINTED")
-
-    # Returns an Array of possible Actions
-    def getPossibleActions(self, node: Node) -> [GameBoard]:
-        moves = []  # GameBoards
-
-        nextPlayer = node.state.getNextPlayer()
-
-        # for spread in node.state.spreadOptions(nextPlayer):
-        #     newBoard = copy.deepcopy(node.state) # use deepcopy instead of copy or else all the boards will be the same
-        #     newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
-        #     moves.append((newBoard, SpreadAction(spread[0], spread[2])))
-
-        for spawn in node.state.spawnOptions():  # creates future boards
-            newBoard = copy.deepcopy(node.state)  # use deepcopy instead of copy or else all the boards will be the same
-            newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
-            moves.append((newBoard, SpawnAction(spawn)))
-
-        ## TESTING
-        # print(f"LastNode State: {node.state.board}")
-        #
-        # # printing moves and their corresponding states test
-        # for i in range(len(moves)):
-        #     print(f"[{i}] Move: {moves[i][1]}, Board: \n{moves[i][0].board}")
-
-        return moves
-
-    def getBestMove(self, node: Node, explorationConstant):
-
-        bestScore = float('-inf')
-        bestMoves = []
-
-        children = node.children.values()
-
-        if node.playouts == 0:
-            return random.choice(list(children))
-
-        for childNode in children:
-            currentPlayer = 0  # !!!!!!!!!!!!!!!!!!!!!!!!!!
-            # print(childNode.board)
-            if childNode.state.getNextPlayer() == self.root.state.getNextPlayer():
-                currentPlayer = 1
-            elif childNode.state.getNextPlayer() != self.root.state.getNextPlayer():
-                currentPlayer = -1
-
-            # if (childNode.playouts == 0):
-            #     return childNode
-
-            meanVisits = currentPlayer * childNode.score / (childNode.playouts+1)
-            # print(f"playouts={node.playouts}, childnode.playouts={childNode.playouts+1}")
-            root = math.log((node.playouts+1) / (childNode.playouts+1))  # asdfasdfasdf +1
-
-            UCB1 = meanVisits + explorationConstant * math.sqrt(root)
-
-            if UCB1 > bestScore:
-                bestScore = UCB1
-                bestMoves = [childNode]
-
-            elif UCB1 == bestScore:
-                bestMoves.append(childNode)
-
-        print(f"numBestMoves={len(bestMoves)}")
-        return random.choice(bestMoves)
-
-
-    ### PLAYOUT ###
-    def playout(self, node: Node):
-
-        newBoard = node.state
-        while not newBoard.getWinner()[0]:
-            try:
-                newBoard = random.choice(self.getPossibleActions(node))
-            except:
-                return 0
-
-        if newBoard.getWinner()[1] == self.root.state.getNextPlayer():
+        if winner == True:
             return 1
-        elif newBoard.getWinner()[1] is None:
-            return 0.5
-        else:
+        elif winner == False:
             return -1
+        else:
+            return 0  # maybe do a negative for a loss
 
-    def backpropagate(self, node, score):
-        while node is not None:
-            node.playouts += 1
-            node.score += score
-            node = node.parent
+class MCTS:
+    def search(self, root_state: GameBoard, timeLimit):
+        # # Constraints
+        # timeStart = datetime.time
+        # timeout = timeStart + datetime.timedelta.__add__(timeLimit)
+
+        root_node = Node(root_state)
+
+        for _ in range(timeLimit):  # change budget with time and space constraints
+        # while time.time() < timeout:  # time limit
+            searchNode = root_node
+            state = copy.deepcopy(root_state)  # has to be deepcopy to individually make changes later on
+
+            # Select
+            while searchNode.isFullyExpanded() and not state.getWinner()[0]:
+                searchNode = searchNode.getBestChild()
+                state.updateBoard(searchNode.state.getCurrentPlayer(), searchNode.state.lastMove)
+
+            # Expand
+            if not searchNode.isFullyExpanded() and not state.getWinner()[0]:
+                unexpandedMoves = [
+                    move for move in state.getLegalMoves()
+                    if not any(node.state.lastMove == move for node in searchNode.children)
+                ]
+                move = random.choice(unexpandedMoves)[1]
+
+                state.updateBoard(searchNode.state.getCurrentPlayer(), move)
+                state.lastMove = move  # adds the move to the GameBoard of the State
+                searchNode = searchNode.addChild(state)
+
+            # Simulate
+            result = searchNode.rollout()
+
+            # Back-Propagate
+            while searchNode is not None:
+                searchNode.update(result)
+                searchNode = searchNode.parent
+
+        # returns node with most visits and highest value
+        return max(root_node.children, key=lambda searchNode: searchNode.visits).state.lastMove

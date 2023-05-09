@@ -1,3 +1,5 @@
+import copy
+
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir, constants, exceptions, board
 
@@ -19,6 +21,7 @@ class GameBoard:
         self.board = self.generateBoard()
         self.power = 0
         self.numTurns = 0
+        self.lastMove = None
 
     def updateBoard(self, colour: PlayerColor, action: Action):
         location = (action.cell.r, action.cell.q)
@@ -75,7 +78,6 @@ class GameBoard:
         elif redPower == 0 and self.numTurns > 2:
             return True, PlayerColor.BLUE
 
-
         # No more Turns
         if self.numTurns == 343:
             if (abs(bluePower-redPower) >= 2):
@@ -93,7 +95,7 @@ class GameBoard:
 
     def spawnOptions(self) -> [SpawnAction]:
         emptySpots = [value.location for value in self.board.values() if
-                      value.colour is not PlayerColor.BLUE or PlayerColor.RED]
+                      value.colour is not PlayerColor.BLUE if value.colour is not PlayerColor.RED]
         return emptySpots
 
     def spreadOptions(self, colour):
@@ -109,8 +111,27 @@ class GameBoard:
         return directionSpots
 
 
-    def getNextPlayer(self):
+    def getCurrentPlayer(self):
         if self.numTurns % 2 == 0:
             return PlayerColor.RED
         else:
             return PlayerColor.BLUE
+
+    def getLegalMoves(self) -> Action:
+        moves = []  # GameBoards
+
+        nextPlayer = self.getCurrentPlayer()
+
+        for spread in self.spreadOptions(nextPlayer):
+            newBoard = copy.deepcopy(self) # use deepcopy instead of copy or else all the boards will be the same
+            newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
+            moves.append((newBoard, SpreadAction(spread[0], spread[2])))
+
+        # print(self.spawnOptions())
+        if self.power < 49:
+            for spawn in self.spawnOptions():  # creates future boards
+                newBoard = copy.deepcopy(self)  # use deepcopy instead of copy or else all the boards will be the same
+                newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
+                moves.append((newBoard, SpawnAction(spawn)))
+
+        return moves
