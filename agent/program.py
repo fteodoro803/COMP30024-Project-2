@@ -5,6 +5,7 @@ import random
 from referee.game import \
     PlayerColor, Action, SpawnAction, SpreadAction, HexPos, HexDir, constants, exceptions, board
 from agent.gameboard import GameBoard
+from agent.mcts import MCTS
 
 # This is the entry point for your game playing agent. Currently the agent
 # simply spawns a token at the centre of the board if playing as RED, and
@@ -37,11 +38,14 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         # Random Spawn and Spread Together
-        location = self.randomSpawn()
-        if self.testTurnCounter >= 50:  # Random Spread at end
-            location, direction = self.randomSpread()
-            return SpreadAction(location, direction)
-        return SpawnAction(location)
+        # location = self.randomSpawn()
+        # if self.testTurnCounter >= 50:  # Random Spread at end
+        #     location, direction = self.randomSpread()
+        #     return SpreadAction(location, direction)
+        # return SpawnAction(location)
+        mcts = MCTS()
+        bestMove = mcts.selectMove(self.testBoard)
+        return bestMove
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):

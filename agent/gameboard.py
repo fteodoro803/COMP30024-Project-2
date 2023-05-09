@@ -52,7 +52,7 @@ class GameBoard:
                     nextHexLocation = nextNode.location.__add__(action.direction)
 
         self.numTurns += 1
-        print(f"UpdateBoard: power={self.power}, moves={self.numTurns}")
+        print(f"UpdateBoard: power={self.power}, moves={self.numTurns}, nextPlayer={self.getNextPlayer()}")
 
 
     def generateBoard(self):
@@ -65,28 +65,52 @@ class GameBoard:
 
         return gameBoard
 
-    # def isTerminal(self):
-
-    def getWinner(self):  # !!!!! this the same as isTerminal?
+    def getWinner(self):  # !!!!! this the same as isTerminal? -> (terminal_state, winner)
         bluePower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.BLUE])
         redPower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.RED])
 
         # Winner in regular Gameplay
         if bluePower == 0 and self.numTurns > 2:
-            return PlayerColor.RED
+            return True, PlayerColor.RED
         elif redPower == 0 and self.numTurns > 2:
-            return PlayerColor.BLUE
+            return True, PlayerColor.BLUE
+
 
         # No more Turns
         if self.numTurns == 343:
             if (abs(bluePower-redPower) >= 2):
                 if (bluePower > redPower):
-                    return PlayerColor.BLUE
+                    return True, PlayerColor.BLUE
                 else:
-                    return PlayerColor.RED
+                    return True, PlayerColor.RED
 
         # No more Tokens
         if redPower == 0 and bluePower == 0 and self.numTurns > 0:
-            return None
+            return True, None
 
-        return None
+        return False, None
+
+
+    def spawnOptions(self):
+        emptySpots = [value.location for value in self.board.values() if
+                      value.colour is not PlayerColor.BLUE or PlayerColor.RED]
+        return emptySpots
+
+    def spreadOptions(self, colour):
+        filledSpots = [value for value in self.board.values() if
+                      value.colour is colour]
+
+        directionSpots = []
+
+        for spot in filledSpots:
+            for direction in HexDir:
+                directionSpots.append((spot.location, spot.power, direction))
+
+        return directionSpots
+
+
+    def getNextPlayer(self):
+        if self.numTurns % 2 == 0:
+            return PlayerColor.RED
+        else:
+            return PlayerColor.BLUE
