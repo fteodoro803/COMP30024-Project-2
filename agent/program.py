@@ -37,7 +37,7 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         mcts = MCTS()
-        timeLimit = 150
+        timeLimit = 200
 
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
