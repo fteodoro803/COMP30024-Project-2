@@ -44,7 +44,7 @@ class Agent:
         #     return SpreadAction(location, direction)
         # return SpawnAction(location)
         mcts = MCTS()
-        bestMove = mcts.selectMove(self.testBoard)
+        bestMove = mcts.search(self.testBoard)
         return bestMove
 
 

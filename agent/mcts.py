@@ -20,7 +20,7 @@ class Node:
 
 class MCTS():
 
-    def selectMove(self, initialState):
+    def search(self, initialState):
         self.root = Node(initialState, None, None)
 
         for iteration in range(1000):
