@@ -62,14 +62,14 @@ class Node:
             return 0  # maybe do a negative for a loss
 
 class MCTS:
-    def search(self, root_state: GameBoard, timeLimit):
+    def search(self, root_state: GameBoard, budget):
         # # Constraints
         # timeStart = datetime.time
         # timeout = timeStart + datetime.timedelta.__add__(timeLimit)
 
         root_node = Node(root_state)
 
-        for _ in range(timeLimit):  # change budget with time and space constraints
+        for temp in range(budget):  # change budget with time and space constraints
         # while time.time() < timeout:  # time limit
             searchNode = root_node
             state = copy.deepcopy(root_state)  # has to be deepcopy to individually make changes later on
