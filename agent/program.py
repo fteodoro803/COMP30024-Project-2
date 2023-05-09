@@ -44,8 +44,16 @@ class Agent:
         #     return SpreadAction(location, direction)
         # return SpawnAction(location)
         mcts = MCTS()
-        bestMove = mcts.search(self.testBoard)
-        return bestMove
+        if (Agent.testTurnCounter <= 6):
+            if Agent.testTurnCounter < 4:
+                return SpawnAction(self.randomSpawn())
+            elif self._color == PlayerColor.RED:
+                bestMove = mcts.search(self.testBoard)
+                return bestMove
+            else:
+                return SpawnAction(self.randomSpawn())
+        else:
+            return
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
@@ -55,13 +63,13 @@ class Agent:
 
         match action:
             case SpawnAction(cell):
-                print(f"Testing: {color} SPAWN at {cell}")
+                # print(f"Testing: {color} Spawn at {cell}")
                 # update the board here bc it's already been tested by this point, so it's valid
                 Agent.testBoard.updateBoard(color, action)
 
                 # pass
             case SpreadAction(cell, direction):
-                print(f"Testing: {color} SPREAD from {cell}, {direction}")
+                # print(f"Testing: {color} Spread from {cell}, {direction}")
                 # update the board here bc it's already been tested by this point, so it's valid
                 Agent.testBoard.updateBoard(color, action)
 
@@ -70,8 +78,8 @@ class Agent:
         # Test Prints
         #print(Agent.testBoard.board)  # our representation of the board
         tiles = [(key, value) for key, value in Agent.testBoard.board.items() if value.colour is not None]  # printing locations with a colour on it
-        print(tiles)
-        print(Agent.testBoard.getWinner())
+        # print(tiles)
+        # print(Agent.testBoard.getWinner())
         Agent.testTurnCounter += 1
 
     def randomSpawn(self) -> HexPos:

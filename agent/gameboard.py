@@ -52,7 +52,7 @@ class GameBoard:
                     nextHexLocation = nextNode.location.__add__(action.direction)
 
         self.numTurns += 1
-        print(f"UpdateBoard: power={self.power}, moves={self.numTurns}, nextPlayer={self.getNextPlayer()}")
+        # print(f"UpdateBoard: power={self.power}, moves={self.numTurns}, nextPlayer={self.getNextPlayer()}")
 
 
     def generateBoard(self):
@@ -91,7 +91,7 @@ class GameBoard:
         return False, None
 
 
-    def spawnOptions(self):
+    def spawnOptions(self) -> [SpawnAction]:
         emptySpots = [value.location for value in self.board.values() if
                       value.colour is not PlayerColor.BLUE or PlayerColor.RED]
         return emptySpots

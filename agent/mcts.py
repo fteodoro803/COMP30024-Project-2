@@ -10,8 +10,8 @@ from agent.gameboard import *
 class Node:
     def __init__(self, board: GameBoard, parent, action):
 
-        self.board = board
-        self.isTerminal = self.isFullyExpanded = self.board.getWinner()[0]
+        self.state = board
+        self.isTerminal = self.isFullyExpanded = self.state.getWinner()[0]
         self.parent = parent
         self.playouts = 0
         self.score = 0
@@ -20,13 +20,19 @@ class Node:
 
 class MCTS():
 
-    def search(self, initialState):
+    def search(self, initialState) -> Action:
         self.root = Node(initialState, None, None)
+        print(f"Board State (Start of MCTS): {self.root.state.board}")
 
-        for iteration in range(1000):
+        for iteration in range(3):
             node = self.select(self.root)
+            # print(node)
+
             score = self.playout(node)
             self.backpropagate(node, score)
+
+        bestMove = self.getBestMove(self.root, 0)
+        print(f"bestMove: {bestMove}")
 
         try:
             return self.getBestMoves(self.root, 0)
@@ -34,69 +40,105 @@ class MCTS():
         except:
             pass
 
-    def select(self, node):
-        while not node.board.getWinner()[0]:
+        # return SpawnAction(HexPos(0,0))
+
+
+    ### NODE SELECTION ###
+    def select(self, node: Node) -> Node:
+        while not node.state.getWinner()[0]:  # while there's no winner
             if node.isFullyExpanded:
-                node = self.getBestMoves(node, 2)
+                # print(f"NODE IS FULLY EXPANDED")
+                node = self.getBestMove(node, 2)  # asdf why is this 2
             else:
-                return self.expand(node)
+                self.expand(node)
+                # return self.expand(node)  # why is there even a return here? doesn't this cut the loop early?
 
         return node
+        # if not node.isFullyExpanded and not node.isTerminal:
+        #     self.expand(node)
+        #
+        # print(f"NODE IS FULLY EXPANDED")
+        # bestNode = self.getBestMoves(node, 2)
+        #
+        # return bestNode
 
     def expand(self, node: Node): #take player color into account
         # states = node.state.generateMoves()
 
 
         # get all the possible states of next player
-        states = self.getNextMoves(node)  # GameBoards
+        states = self.getPossibleActions(node)  # GameBoards
+        # print(f"numStates={len(states)}, numChildren={len(node.children)}")
 
         for state in states:
-            if state.board not in node.children:
+            # print(f"\tnumChildren={len(node.children)}")
+            # print(f"\t(expand) currState={state}")
+            expandedState = state[0]
+            boardMove = state[1]
+            # print(f"\t(expand) expandedState={expandedState}")
+
+            if expandedState not in node.children:  # adds nodes to children
                 new_node = Node(state[0], node, state[1])
                 node.children[state[0]] = new_node
 
                 if len(states) == len(node.children):
                     node.isFullyExpanded = True
 
-                return new_node
+                return new_node  # why do we return one of the children nodes? if the goal of this function is to expand on the current node?
 
-    def playout(self, node: Node):
+        print("SOMETHING WENT HORRIBLY WRONG IF THIS PRINTED")
 
-        newBoard = node.board
-        while not newBoard.getWinner()[0]:
-            try:
-                newBoard = random.choice(self.getNextMoves(node))
-            except:
-                return 0
+    # Returns an Array of possible Actions
+    def getPossibleActions(self, node: Node) -> [GameBoard]:
+        moves = []  # GameBoards
 
-        if newBoard.getWinner()[1] == self.root.board.getNextPlayer():
-            return 1
-        elif newBoard.getWinner()[1] is None:
-            return 0.5
-        else:
-            return -1
+        nextPlayer = node.state.getNextPlayer()
 
+        # for spread in node.state.spreadOptions(nextPlayer):
+        #     newBoard = copy.deepcopy(node.state) # use deepcopy instead of copy or else all the boards will be the same
+        #     newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
+        #     moves.append((newBoard, SpreadAction(spread[0], spread[2])))
 
-    def backpropagate(self, node, score):
-        while node is not None:
-            node.playouts += 1
-            node.score += score
-            node = node.parent
+        for spawn in node.state.spawnOptions():  # creates future boards
+            newBoard = copy.deepcopy(node.state)  # use deepcopy instead of copy or else all the boards will be the same
+            newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
+            moves.append((newBoard, SpawnAction(spawn)))
 
-    def getBestMoves(self, node, explorationConstant):
+        ## TESTING
+        # print(f"LastNode State: {node.state.board}")
+        #
+        # # printing moves and their corresponding states test
+        # for i in range(len(moves)):
+        #     print(f"[{i}] Move: {moves[i][1]}, Board: \n{moves[i][0].board}")
+
+        return moves
+
+    def getBestMove(self, node: Node, explorationConstant):
 
         bestScore = float('-inf')
         bestMoves = []
 
-        for childNode in node.children.values():
+        children = node.children.values()
+
+        if node.playouts == 0:
+            return random.choice(list(children))
+
+        for childNode in children:
             currentPlayer = 0  # !!!!!!!!!!!!!!!!!!!!!!!!!!
-            if childNode.board.getNextPlayer() == self.root.board.getNextPlayer():
+            # print(childNode.board)
+            if childNode.state.getNextPlayer() == self.root.state.getNextPlayer():
                 currentPlayer = 1
-            elif childNode.board.getNextPlayer() != self.root.board.getNextPlayer():
+            elif childNode.state.getNextPlayer() != self.root.state.getNextPlayer():
                 currentPlayer = -1
 
-            UCB1 = currentPlayer * childNode.score / childNode.playouts + \
-                        explorationConstant * math.sqrt(math.log(node.playouts / childNode.playouts))
+            # if (childNode.playouts == 0):
+            #     return childNode
+
+            meanVisits = currentPlayer * childNode.score / (childNode.playouts+1)
+            # print(f"playouts={node.playouts}, childnode.playouts={childNode.playouts+1}")
+            root = math.log((node.playouts+1) / (childNode.playouts+1))  # asdfasdfasdf +1
+
+            UCB1 = meanVisits + explorationConstant * math.sqrt(root)
 
             if UCB1 > bestScore:
                 bestScore = UCB1
@@ -105,21 +147,29 @@ class MCTS():
             elif UCB1 == bestScore:
                 bestMoves.append(childNode)
 
+        print(f"numBestMoves={len(bestMoves)}")
         return random.choice(bestMoves)
 
-    def getNextMoves(self, node: Node):
-        moves = []  # GameBoards
 
-        nextPlayer = node.board.getNextPlayer()
+    ### PLAYOUT ###
+    def playout(self, node: Node):
 
-        for spread in node.board.spreadOptions(nextPlayer):
-            newBoard = copy.copy(node.board)
-            newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
-            moves.append((newBoard, SpreadAction(spread[0], spread[2])))
+        newBoard = node.state
+        while not newBoard.getWinner()[0]:
+            try:
+                newBoard = random.choice(self.getPossibleActions(node))
+            except:
+                return 0
 
-        for spawn in node.board.spawnOptions():  # creates future boards
-            newBoard = copy.copy(node.board)
-            newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
-            moves.append((newBoard, SpawnAction(spawn)))
+        if newBoard.getWinner()[1] == self.root.state.getNextPlayer():
+            return 1
+        elif newBoard.getWinner()[1] is None:
+            return 0.5
+        else:
+            return -1
 
-        return moves
+    def backpropagate(self, node, score):
+        while node is not None:
+            node.playouts += 1
+            node.score += score
+            node = node.parent
