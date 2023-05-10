@@ -82,7 +82,7 @@ class GameBoard:
             return True, PlayerColor.BLUE, score
 
         # No more Turns
-        if self.numTurns == 343:
+        if self.numTurns == 343-1:
             if (abs(bluePower-redPower) >= 2):
                 if (bluePower > redPower):
                     score = bluePower-redPower

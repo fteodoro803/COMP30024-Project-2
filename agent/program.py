@@ -46,20 +46,32 @@ class Agent:
         #     return SpreadAction(location, direction)
         # return SpawnAction(location)
 
-        if (Agent.testTurnCounter <= 343):
-            if (self._color == PlayerColor.RED and Agent.testTurnCounter < 42):
-                return SpawnAction(self.randomSpawn())
-            if self._color == PlayerColor.RED:
+        # if (Agent.testTurnCounter <= 343):  # full gameplay test
+        #     if (self._color == PlayerColor.RED and Agent.testTurnCounter < 42):
+        #         return SpawnAction(self.randomSpawn())
+        #     if self._color == PlayerColor.RED:
+        #         bestMove = mcts.search(self.testBoard, timeLimit)
+        #         return bestMove
+        #     if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
+        #         return SpawnAction(self.randomSpawn())
+        #
+        #     else:
+        #         action = self.randomSpread()
+        #         return SpreadAction(action[0], action[1])
+        #     # bestMove = mcts.search(self.testBoard, timeLimit)
+        #     # return bestMove
+        if (Agent.testTurnCounter <= 343):  # stupidity test
+            if Agent.testTurnCounter == 1:
+                return SpawnAction(HexPos(3,3))
+            elif Agent.testTurnCounter == 2:
+                return SpawnAction(HexPos(3,4))
+            elif Agent.testTurnCounter == 3:
+                return SpawnAction(HexPos(3,2))
+            elif Agent.testTurnCounter == 4:
+                return SpreadAction(HexPos(3,4), HexDir.Up)
+            else:
                 bestMove = mcts.search(self.testBoard, timeLimit)
                 return bestMove
-            if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
-                return SpawnAction(self.randomSpawn())
-
-            else:
-                action = self.randomSpread()
-                return SpreadAction(action[0], action[1])
-            # bestMove = mcts.search(self.testBoard, timeLimit)
-            # return bestMove
         else:
             return
 

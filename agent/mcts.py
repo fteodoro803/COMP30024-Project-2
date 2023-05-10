@@ -13,11 +13,11 @@ class Node:
         self.parent = parent
         self.children = []
         self.visits = 0
-        self.wins = 0  # was wins, maybe change to score?
+        self.score = 0  # was wins, maybe change to score?
 
     def update(self, result):
         self.visits += 1
-        self.wins += result
+        self.score += result
 
     def addChild(self, childState):  # returns a Node but python doesn't let me add it as a typehint
         childNode = Node(childState, self)
@@ -27,12 +27,12 @@ class Node:
     def isFullyExpanded(self) -> bool:
         return len(self.children) == len(self.state.getLegalMoves())
 
-    def getBestChild(self):  # returns a Node but python doesn't let me add it as a typehint
+    def getBestChild(self):  # returns a Node but python doesn't let me add it as a typehint  | !!!!! also is kinda weird i think. it doesn't seem to choose THE best option
         choiceWeights = []
         constant = 2
 
         for child in self.children:
-            choiceWeights.append((child.wins / child.visits) + constant * math.sqrt((2 * math.log(self.visits) / child.visits)))
+            choiceWeights.append((child.score / child.visits) + constant * math.sqrt((2 * math.log(self.visits) / child.visits)))
 
         return self.children[choiceWeights.index(max(choiceWeights))]
 
@@ -42,7 +42,8 @@ class Node:
         isTerminal = currentState.getWinner()[0]
         # print(f"isTerminal: {isTerminal}")
         while not isTerminal:
-            possibleMoves = currentState.getLegalMoves()
+            possibleMoves = currentState.getLegalMoves()  # !!! i feel like this could be weird ,or the way it selects the random moves
+            # print(possibleMoves)
             choice = random.choice(possibleMoves)
             currentState = choice[0]
             # print(f"CurrentState 2: {currentState}")
@@ -66,8 +67,6 @@ class MCTS:
             # Select
             while searchNode.isFullyExpanded() and not state.getWinner()[0]:  # this part is never gone through
                 searchNode = searchNode.getBestChild()  # UCB1 stuff
-                # print("HI")
-                # print(searchNode.state.getCurrentPlayer)
                 state.updateBoard(searchNode.state.getCurrentPlayer(), searchNode.state.lastMove)  # changes board according to the best child
 
             # Expand

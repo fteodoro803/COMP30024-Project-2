@@ -16,6 +16,7 @@ COMMENT: ASDF
 - maybe the first like 40 turns should be fairly simple random things
 - try to get like, 20 pieces on the board? something to maximise number of pieces. Prioritise moves that eat other pieces. Give a higher reward for eating other pieces(?) or maximising the difference of power
 - try to spread to pieces with high power
+- add least Amount of Turns to Win to the Utility??
 
 ### TO FIX
 - it will spawn things even after board max has been reached. should not allow it to spawn more if
