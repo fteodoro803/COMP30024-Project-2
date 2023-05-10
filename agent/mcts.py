@@ -37,7 +37,6 @@ class Node:
         return self.children[choiceWeights.index(max(choiceWeights))]
 
     def rollout(self):  # random moves to get to the point\
-        print("doing playout")
         currentState = self.state
         # print(f"CurrentState 1: {currentState}")
         isTerminal = currentState.getWinner()[0]

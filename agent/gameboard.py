@@ -131,8 +131,10 @@ class GameBoard:
 
         if len(smartSpawns) > 0:
             return smartSpawns
-        else:
+        elif len(spawns) > 0:
             return spawns
+        else:
+            return emptyCells
 
     def smartSpread(self, colour):
         spreads = self.spreadOptions(self.getCurrentPlayer())

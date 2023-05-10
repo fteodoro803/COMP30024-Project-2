@@ -37,6 +37,10 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         mcts = MCTS()
+        # if self.testTurnCounter < 10:
+        #     timeLimit = 5
+        # elif self.testTurnCounter >= 10:
+        #     timeLimit = 30
         timeLimit = 10
 
         # Random Spawn and Spread Together
