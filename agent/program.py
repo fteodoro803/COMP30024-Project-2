@@ -37,7 +37,7 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         mcts = MCTS()
-        timeLimit = 200
+        timeLimit = 10
 
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
@@ -47,19 +47,19 @@ class Agent:
         # return SpawnAction(location)
 
         if (Agent.testTurnCounter <= 343):
-            # if (self._color == PlayerColor.RED and Agent.testTurnCounter < 8):
-            #     return SpawnAction(self.randomSpawn())
-            # if self._color == PlayerColor.RED:
-            #     bestMove = mcts.search(self.testBoard, timeLimit)
-            #     return bestMove
-            # if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
-            #     return SpawnAction(self.randomSpawn())
-            #
-            # else:
-            #     action = self.randomSpread()
-            #     return SpreadAction(action[0], action[1])
-            bestMove = mcts.search(self.testBoard, timeLimit)
-            return bestMove
+            if (self._color == PlayerColor.RED and Agent.testTurnCounter < 42):
+                return SpawnAction(self.randomSpawn())
+            if self._color == PlayerColor.RED:
+                bestMove = mcts.search(self.testBoard, timeLimit)
+                return bestMove
+            if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
+                return SpawnAction(self.randomSpawn())
+
+            else:
+                action = self.randomSpread()
+                return SpreadAction(action[0], action[1])
+            # bestMove = mcts.search(self.testBoard, timeLimit)
+            # return bestMove
         else:
             return
 

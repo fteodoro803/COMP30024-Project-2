@@ -13,21 +13,21 @@ class Node:
         self.parent = parent
         self.children = []
         self.visits = 0
-        self.wins = 0
+        self.wins = 0  # was wins, maybe change to score?
 
     def update(self, result):
         self.visits += 1
         self.wins += result
 
-    def addChild(self, childState):
+    def addChild(self, childState):  # returns a Node but python doesn't let me add it as a typehint
         childNode = Node(childState, self)
         self.children.append(childNode)
         return childNode
 
-    def isFullyExpanded(self):
+    def isFullyExpanded(self) -> bool:
         return len(self.children) == len(self.state.getLegalMoves())
 
-    def getBestChild(self):
+    def getBestChild(self):  # returns a Node but python doesn't let me add it as a typehint
         choiceWeights = []
         constant = 2
 
@@ -38,28 +38,17 @@ class Node:
 
     def rollout(self):  # random moves to get to the point
         currentState = self.state
+        # print(f"CurrentState 1: {currentState}")
         isTerminal = currentState.getWinner()[0]
-        winner = None
-
-        # does Simulations while board's State is not Terminal
+        # print(f"isTerminal: {isTerminal}")
         while not isTerminal:
-            possible_moves = currentState.getLegalMoves()
-            randomChoice = random.choice(possible_moves)
+            possibleMoves = currentState.getLegalMoves()
+            choice = random.choice(possibleMoves)
+            currentState = choice[0]
+            # print(f"CurrentState 2: {currentState}")
+            isTerminal = choice[0].getWinner()
+        return currentState.getWinner()[2]
 
-            # for choice in possible_moves:    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! heuristic???
-            #     if choice.power > randomChoice.power:
-            #         randomChoice = choice
-
-            currentState.updateBoard(randomChoice[0], randomChoice[1])
-            isTerminal = randomChoice[0]
-            winner = randomChoice[1]
-
-        if winner == True:
-            return 1
-        elif winner == False:
-            return -1
-        else:
-            return 0  # maybe do a negative for a loss
 
 class MCTS:
     def search(self, root_state: GameBoard, budget):
@@ -75,9 +64,11 @@ class MCTS:
             state = copy.deepcopy(root_state)  # has to be deepcopy to individually make changes later on
 
             # Select
-            while searchNode.isFullyExpanded() and not state.getWinner()[0]:
-                searchNode = searchNode.getBestChild()
-                state.updateBoard(searchNode.state.getCurrentPlayer(), searchNode.state.lastMove)
+            while searchNode.isFullyExpanded() and not state.getWinner()[0]:  # this part is never gone through
+                searchNode = searchNode.getBestChild()  # UCB1 stuff
+                # print("HI")
+                # print(searchNode.state.getCurrentPlayer)
+                state.updateBoard(searchNode.state.getCurrentPlayer(), searchNode.state.lastMove)  # changes board according to the best child
 
             # Expand
             if not searchNode.isFullyExpanded() and not state.getWinner()[0]:

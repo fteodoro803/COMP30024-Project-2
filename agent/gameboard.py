@@ -68,29 +68,35 @@ class GameBoard:
 
         return gameBoard
 
-    def getWinner(self):  # !!!!! this the same as isTerminal? -> (terminal_state, winner)
+    def getWinner(self) -> (bool, PlayerColor, int):  # !!!!! this the same as isTerminal? -> (terminal_state, winner)
         bluePower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.BLUE])
         redPower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.RED])
+        score = 0
 
         # Winner in regular Gameplay
         if bluePower == 0 and self.numTurns > 2:
-            return True, PlayerColor.RED
+            score = redPower - bluePower
+            return True, PlayerColor.RED, score
         elif redPower == 0 and self.numTurns > 2:
-            return True, PlayerColor.BLUE
+            score = bluePower - redPower
+            return True, PlayerColor.BLUE, score
 
         # No more Turns
         if self.numTurns == 343:
             if (abs(bluePower-redPower) >= 2):
                 if (bluePower > redPower):
-                    return True, PlayerColor.BLUE
+                    score = bluePower-redPower
+                    return True, PlayerColor.BLUE, score
                 else:
-                    return True, PlayerColor.RED
+                    score = redPower-bluePower
+                    return True, PlayerColor.RED, score
 
         # No more Tokens
         if redPower == 0 and bluePower == 0 and self.numTurns > 0:
-            return True, None
+            score = 0
+            return True, None, score
 
-        return False, None
+        return False, None, 0
 
 
     def spawnOptions(self) -> [SpawnAction]:
@@ -117,7 +123,7 @@ class GameBoard:
         else:
             return PlayerColor.BLUE
 
-    def getLegalMoves(self) -> Action:
+    def getLegalMoves(self) -> Action:   # why are we doing so much processin? idk if we need to do any copying here, just do a random move coz that's all we need anyway
         moves = []  # GameBoards
 
         nextPlayer = self.getCurrentPlayer()

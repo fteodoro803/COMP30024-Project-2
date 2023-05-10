@@ -12,9 +12,10 @@ COMMENT: ASDF
 - does my board spawn something (ie at power >49) when the referee wont? will it reflect??
 
 ### OPTIMISATIONS
-- MCTS calculations start from current state of board
-- but what if the current state and some future states were already found before? couldn't we optimise it by using the old calculations and going from there? or does the thingy keep the info from last computation?? probably does
 - after a certain amount of tokens on board, do spread actions only???
+- maybe the first like 40 turns should be fairly simple random things
+- try to get like, 20 pieces on the board? something to maximise number of pieces. Prioritise moves that eat other pieces. Give a higher reward for eating other pieces(?) or maximising the difference of power
+- try to spread to pieces with high power
 
 ### TO FIX
 - it will spawn things even after board max has been reached. should not allow it to spawn more if
