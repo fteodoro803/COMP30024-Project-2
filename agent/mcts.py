@@ -75,7 +75,8 @@ class MCTS:
                     move for move in state.getLegalMoves()
                     if not any(node.state.lastMove == move for node in searchNode.children)
                 ]
-                move = random.choice(unexpandedMoves)[1]
+                # move = random.choice(unexpandedMoves)[1]
+                move = unexpandedMoves[0][1]
 
                 state.updateBoard(searchNode.state.getCurrentPlayer(), move)
                 state.lastMove = move  # adds the move to the GameBoard of the State

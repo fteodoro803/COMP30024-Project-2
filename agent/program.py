@@ -37,7 +37,7 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         mcts = MCTS()
-        timeLimit = 10
+        timeLimit = 20
 
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
@@ -68,7 +68,11 @@ class Agent:
             elif Agent.testTurnCounter == 3:
                 return SpawnAction(HexPos(3,2))
             elif Agent.testTurnCounter == 4:
-                return SpreadAction(HexPos(3,4), HexDir.Up)
+                return SpreadAction(HexPos(3,4), HexDir.UpRight)
+            elif Agent.testTurnCounter == 5:
+                return SpawnAction(HexPos(3,6))
+            elif Agent.testTurnCounter == 6:
+                return SpawnAction(HexPos(3,5))
             else:
                 bestMove = mcts.search(self.testBoard, timeLimit)
                 return bestMove
