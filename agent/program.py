@@ -33,11 +33,12 @@ class Agent:
         """
         Return the next action to take.
         """
-        print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
-        print(referee['time_remaining'])
-        print(referee)
+        # print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
+        # print(referee['time_remaining'])
+        # print(referee)
         mcts = MCTS()
-        timeLimit = 20
+        timeLimit = 3
+        # print(f"total={Agent.testBoard.getPlayerPower(PlayerColor.RED)+Agent.testBoard.getPlayerPower(PlayerColor.BLUE)} | redPower={Agent.testBoard.getPlayerPower(PlayerColor.RED)}, bluePower={Agent.testBoard.getPlayerPower(PlayerColor.BLUE)}")
 
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
@@ -56,28 +57,31 @@ class Agent:
         #         return SpawnAction(self.randomSpawn())
         #
         #     else:
-        #         action = self.randomSpread()
-        #         return SpreadAction(action[0], action[1])
+        #         # action = self.randomSpread()
+        #         # return SpreadAction(action[0], action[1])
+        #         bestMove = mcts.search(self.testBoard, timeLimit)
+        #         return bestMove
         #     # bestMove = mcts.search(self.testBoard, timeLimit)
         #     # return bestMove
-        if (Agent.testTurnCounter <= 343):  # stupidity test
-            if Agent.testTurnCounter == 1:
-                return SpawnAction(HexPos(3,3))
-            elif Agent.testTurnCounter == 2:
-                return SpawnAction(HexPos(3,4))
-            elif Agent.testTurnCounter == 3:
-                return SpawnAction(HexPos(3,2))
-            elif Agent.testTurnCounter == 4:
-                return SpreadAction(HexPos(3,4), HexDir.UpRight)
-            elif Agent.testTurnCounter == 5:
-                return SpawnAction(HexPos(3,6))
-            elif Agent.testTurnCounter == 6:
-                return SpawnAction(HexPos(3,5))
-            else:
-                bestMove = mcts.search(self.testBoard, timeLimit)
-                return bestMove
+
+        # if (Agent.testTurnCounter <= 343):  # stupidity test
+        #     if (Agent.testTurnCounter < 40):
+        #         return SpawnAction(self.randomSpawn())
+        #     elif (self._color == PlayerColor.RED):
+        #         bestMove = mcts.search(self.testBoard, timeLimit)
+        #         return bestMove
+        #     else:
+        #         return SpawnAction(self.randomSpawn())
+        # else:
+        #     return
+
+
+        #LMS
+        if (Agent.testTurnCounter < 10 and PlayerColor.RED):
+            return SpawnAction(self.randomSpawn())
         else:
-            return
+            bestMove = mcts.search(self.testBoard, timeLimit)
+            return bestMove
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
