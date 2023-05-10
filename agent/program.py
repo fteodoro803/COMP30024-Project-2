@@ -15,8 +15,8 @@ from .mcts import MCTS
 
 class Agent:
     # STATIC VARIABLES
-    testBoard = GameBoard()
-    testTurnCounter = 1 # ASDF test
+    board = GameBoard()
+    turnCount = 1
 
     def __init__(self, color: PlayerColor, **referee: dict):
         """
@@ -33,15 +33,18 @@ class Agent:
         """
         Return the next action to take.
         """
-        print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
-        mcts = MCTS()
-        timeLimit = 10
+        # print(f"\n====================================ITERATION {Agent.turnCount}====================================")
+        time = referee['time_remaining']
+        # print(f"referee={time}")
 
-        if (Agent.testTurnCounter <= 343):  # stupidity test
-            bestMove = mcts.search(self.testBoard, timeLimit)
+        # Maximising Time
+        if time >= 4:  # if time runs out, don't run MCTS
+            mcts = MCTS()
+            bestMove = mcts.search(self.board)
             return bestMove
         else:
-            return
+
+            return random.choice(Agent.board.getLegalMoves())[1]
 
 
     def turn(self, color: PlayerColor, action: Action, **referee: dict):
@@ -51,22 +54,10 @@ class Agent:
 
         match action:
             case SpawnAction(cell):
-                # print(f"Testing: {color} Spawn at {cell}")
-                # update the board here bc it's already been tested by this point, so it's valid
-                Agent.testBoard.updateBoard(color, action)
+                Agent.board.updateBoard(color, action)
 
-                # pass
             case SpreadAction(cell, direction):
-                # print(f"Testing: {color} Spread from {cell}, {direction}")
-                # update the board here bc it's already been tested by this point, so it's valid
-                Agent.testBoard.updateBoard(color, action)
+                Agent.board.updateBoard(color, action)
 
-                # pass
-
-        # Test Prints
-        #print(Agent.testBoard.board)  # our representation of the board
-        tiles = [(key, value) for key, value in Agent.testBoard.board.items() if value.colour is not None]  # printing locations with a colour on it
-        # print(tiles)
-        # print(Agent.testBoard.getWinner())
-        Agent.testTurnCounter += 1
+        Agent.turnCount += 1
 
