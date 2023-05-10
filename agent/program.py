@@ -37,7 +37,7 @@ class Agent:
         # print(referee['time_remaining'])
         # print(referee)
         mcts = MCTS()
-        timeLimit = 30
+        timeLimit = 5
         # print(f"total={Agent.testBoard.getPlayerPower(PlayerColor.RED)+Agent.testBoard.getPlayerPower(PlayerColor.BLUE)} | redPower={Agent.testBoard.getPlayerPower(PlayerColor.RED)}, bluePower={Agent.testBoard.getPlayerPower(PlayerColor.BLUE)}")
 
         # Random Spawn and Spread Together
