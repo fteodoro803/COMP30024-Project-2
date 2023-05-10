@@ -98,23 +98,70 @@ class GameBoard:
 
         return False, None, 0
 
+    def getOpponentNextPositions(self):
+        opponentSpreads = self.spreadOptions(self.getOtherPlayer())
+        opponentSpreadPieces = []
+        for spread in opponentSpreads:
+            position = spread[0]
+            direction = spread[2]
+            for iter in range(spread[1]):
+                nextHexLocation = position.__add__(direction)
+                opponentSpreadPieces.append(nextHexLocation)
+                position = nextHexLocation
+        return opponentSpreadPieces
 
     def spawnOptions(self) -> [SpawnAction]:
-        emptySpots = [value.location for value in self.board.values() if
-                      value.colour is not PlayerColor.BLUE if value.colour is not PlayerColor.RED]
-        return emptySpots
+        opponentSpreadPieces = self.getOpponentNextPositions()
+        playerCells = [value.location for value in self.board.values() if value.colour is self.getCurrentPlayer()]
+        emptyCells = [value.location for value in self.board.values() if value.colour is None]
+        spawns = []
+        smartSpawns = []
+
+        for cell in emptyCells:
+            if cell not in opponentSpreadPieces:
+                spawns.append(cell)
+            else:
+                isAdjacent = False
+                for direction in HexDir:
+                    adjacentCell = cell.__add__(direction)
+                    if adjacentCell in playerCells and adjacentCell not in opponentSpreadPieces:
+                        isAdjacent = True
+                if isAdjacent:
+                    smartSpawns.append(cell)
+
+        if len(smartSpawns) > 0:
+            return smartSpawns
+        else:
+            return spawns
+
+    def smartSpread(self, colour):
+        spreads = self.spreadOptions(self.getCurrentPlayer())
+        opponentSpreadPieces = self.getOpponentNextPositions()
+        smartSpreads = []
+
+        for spread in spreads:
+            if spread[1] == 1:
+                nextHexLocation = spread[0].__add__(spread[2])
+                if nextHexLocation not in opponentSpreadPieces:
+                    smartSpreads.append(spread)
+            else:
+                smartSpreads.append(spread)
+        if len(smartSpreads) == 0:
+            return spreads
+        return smartSpreads
+
 
     def spreadOptions(self, colour):
-        filledSpots = [value for value in self.board.values() if
+        pieces = [value for value in self.board.values() if
                       value.colour is colour]
 
-        directionSpots = []
+        spreads = []
 
-        for spot in filledSpots:
+        for piece in pieces:
             for direction in HexDir:
-                directionSpots.append((spot.location, spot.power, direction))
+                spreads.append((piece.location, piece.power, direction))
 
-        return directionSpots
+        return spreads
 
 
     def getCurrentPlayer(self):
@@ -123,16 +170,27 @@ class GameBoard:
         else:
             return PlayerColor.BLUE
 
+    def getOtherPlayer(self):
+        if self.numTurns % 2 == 0:
+            return PlayerColor.BLUE
+        else:
+            return PlayerColor.RED
+
     def getLegalMoves(self) -> Action:   # why are we doing so much processin? idk if we need to do any copying here, just do a random move coz that's all we need anyway
+        goodMoves = []
         moves = []  # GameBoards
 
         nextPlayer = self.getCurrentPlayer()
 
-        for spread in self.spreadOptions(nextPlayer):
+        for spread in self.smartSpread(nextPlayer):
             newBoard = copy.deepcopy(self) # use deepcopy instead of copy or else all the boards will be the same
             newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
+
+            # important for the report --> efficiency of the program
+            # currently only choosing the most recent guy -- want to determine the best choice out of the power increasing moves
             if newBoard.getPlayerPower(nextPlayer) > self.getPlayerPower(nextPlayer):
-                moves.insert(0, (newBoard, SpreadAction(spread[0], spread[2])))
+                goodMoves.append((newBoard, SpreadAction(spread[0], spread[2])))
+                moves.append((newBoard, SpreadAction(spread[0], spread[2])))
             else:
                 moves.append((newBoard, SpreadAction(spread[0], spread[2])))
 
@@ -141,9 +199,14 @@ class GameBoard:
             for spawn in self.spawnOptions():  # creates future boards
                 newBoard = copy.deepcopy(self)  # use deepcopy instead of copy or else all the boards will be the same
                 newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
+                # goodMoves.append() if it fits some criteria
                 moves.append((newBoard, SpawnAction(spawn)))
-
-        return moves
+        # print(f"# GOOD MOVES: {len(goodMoves)}")
+        # print(f"# MOVES: {len(moves)}")
+        if len(goodMoves) > 0:
+            return goodMoves
+        else:
+            return moves
 
     def getPlayerPower(self, colour: PlayerColor):
         return sum([value.power for value in self.board.values() if value.colour is colour])

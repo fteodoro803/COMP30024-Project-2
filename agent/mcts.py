@@ -36,7 +36,8 @@ class Node:
 
         return self.children[choiceWeights.index(max(choiceWeights))]
 
-    def rollout(self):  # random moves to get to the point
+    def rollout(self):  # random moves to get to the point\
+        print("doing playout")
         currentState = self.state
         # print(f"CurrentState 1: {currentState}")
         isTerminal = currentState.getWinner()[0]
@@ -75,8 +76,8 @@ class MCTS:
                     move for move in state.getLegalMoves()
                     if not any(node.state.lastMove == move for node in searchNode.children)
                 ]
-                # move = random.choice(unexpandedMoves)[1]
-                move = unexpandedMoves[0][1]
+                move = random.choice(unexpandedMoves)[1]
+                # move = unexpandedMoves[0][1] # prioritizing expanding the child that increases the overall power of the player
 
                 state.updateBoard(searchNode.state.getCurrentPlayer(), move)
                 state.lastMove = move  # adds the move to the GameBoard of the State
@@ -91,4 +92,6 @@ class MCTS:
                 searchNode = searchNode.parent
 
         # returns node with most visits and highest value
+        print(f"WINS: {root_node.score}")
+        print(f"VISITS: {root_node.visits}")
         return max(root_node.children, key=lambda searchNode: searchNode.visits).state.lastMove

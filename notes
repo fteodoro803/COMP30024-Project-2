@@ -17,6 +17,10 @@ COMMENT: ASDF
 - try to get like, 20 pieces on the board? something to maximise number of pieces. Prioritise moves that eat other pieces. Give a higher reward for eating other pieces(?) or maximising the difference of power
 - try to spread to pieces with high power
 - add least Amount of Turns to Win to the Utility??
+- do not spawn anywhere next to another colored tile where it can be taken (or within the range of a power>1 tile)
+- prioritize spawning next to itself so that it can increase its own power
+
+-IF LOSING, PRIORITIZE SPAWN ACTIONS TO CONFUSE OPPONENT AND DRAW OUT THE GAME LOL
 
 ### TO FIX
 - it will spawn things even after board max has been reached. should not allow it to spawn more if
