@@ -131,7 +131,10 @@ class GameBoard:
         for spread in self.spreadOptions(nextPlayer):
             newBoard = copy.deepcopy(self) # use deepcopy instead of copy or else all the boards will be the same
             newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
-            moves.append((newBoard, SpreadAction(spread[0], spread[2])))
+            if newBoard.getColorPower(nextPlayer) > self.getColorPower(nextPlayer):
+                moves.insert(0, (newBoard, SpreadAction(spread[0], spread[2])))
+            else:
+                moves.append((newBoard, SpreadAction(spread[0], spread[2])))
 
         # print(self.spawnOptions())
         if self.power < 49:
@@ -140,4 +143,10 @@ class GameBoard:
                 newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
                 moves.append((newBoard, SpawnAction(spawn)))
 
+
+
+
         return moves
+
+    def getColorPower(self, colour: PlayerColor):
+        return sum([value.power for value in self.board.values() if value.colour is colour])

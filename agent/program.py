@@ -37,7 +37,7 @@ class Agent:
         print(referee['time_remaining'])
         print(referee)
         mcts = MCTS()
-        timeLimit = 10
+        timeLimit = 60
 
         # Random Spawn and Spread Together
         # location = self.randomSpawn()
@@ -47,17 +47,18 @@ class Agent:
         # return SpawnAction(location)
 
         # if (Agent.testTurnCounter <= 343):  # full gameplay test
-        #     if (self._color == PlayerColor.RED and Agent.testTurnCounter < 42):
+        #     if (self._color == PlayerColor.RED and Agent.testTurnCounter < 8):
         #         return SpawnAction(self.randomSpawn())
         #     if self._color == PlayerColor.RED:
         #         bestMove = mcts.search(self.testBoard, timeLimit)
         #         return bestMove
-        #     if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
+        #     if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 343:
         #         return SpawnAction(self.randomSpawn())
         #
         #     else:
         #         action = self.randomSpread()
         #         return SpreadAction(action[0], action[1])
+
         #     # bestMove = mcts.search(self.testBoard, timeLimit)
         #     # return bestMove
         if (Agent.testTurnCounter <= 343):  # stupidity test
@@ -68,7 +69,12 @@ class Agent:
             elif Agent.testTurnCounter == 3:
                 return SpawnAction(HexPos(3,2))
             elif Agent.testTurnCounter == 4:
-                return SpreadAction(HexPos(3,4), HexDir.Up)
+                return SpawnAction(HexPos(4,4))
+            elif Agent.testTurnCounter == 5:
+                bestMove = mcts.search(self.testBoard, timeLimit)
+                return bestMove
+            elif Agent.testTurnCounter == 6:
+                return SpreadAction(HexPos(4,4), HexDir.Down)
             else:
                 bestMove = mcts.search(self.testBoard, timeLimit)
                 return bestMove
