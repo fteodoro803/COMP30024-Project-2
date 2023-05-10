@@ -50,7 +50,7 @@ class Node:
 
 
 class MCTS:
-    iterationLimit = 40
+    iterationLimit = 20
     def search(self, root_state: GameBoard):
         rootNode = Node(root_state)
 
