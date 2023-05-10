@@ -34,50 +34,10 @@ class Agent:
         Return the next action to take.
         """
         print(f"\n====================================ITERATION {Agent.testTurnCounter}====================================")
-        print(referee['time_remaining'])
-        print(referee)
         mcts = MCTS()
-        # if self.testTurnCounter < 10:
-        #     timeLimit = 5
-        # elif self.testTurnCounter >= 10:
-        #     timeLimit = 30
         timeLimit = 10
 
-        # Random Spawn and Spread Together
-        # location = self.randomSpawn()
-        # if self.testTurnCounter >= 50:  # Random Spread at end
-        #     location, direction = self.randomSpread()
-        #     return SpreadAction(location, direction)
-        # return SpawnAction(location)
-
-        # if (Agent.testTurnCounter <= 343):  # full gameplay test
-        #     if (self._color == PlayerColor.RED and Agent.testTurnCounter < 42):
-        #         return SpawnAction(self.randomSpawn())
-        #     if self._color == PlayerColor.RED:
-        #         bestMove = mcts.search(self.testBoard, timeLimit)
-        #         return bestMove
-        #     if self._color == PlayerColor.BLUE and Agent.testTurnCounter < 20:
-        #         return SpawnAction(self.randomSpawn())
-        #
-        #     else:
-        #         action = self.randomSpread()
-        #         return SpreadAction(action[0], action[1])
-        #     # bestMove = mcts.search(self.testBoard, timeLimit)
-        #     # return bestMove
         if (Agent.testTurnCounter <= 343):  # stupidity test
-            # if Agent.testTurnCounter == 1:
-            #     return SpawnAction(HexPos(3,3))
-            # elif Agent.testTurnCounter == 2:
-            #     return SpawnAction(HexPos(3,4))
-            # elif Agent.testTurnCounter == 3:
-            #     return SpawnAction(HexPos(3,2))
-            # elif Agent.testTurnCounter == 4:
-            #     return SpreadAction(HexPos(3,4), HexDir.UpRight)
-            # elif Agent.testTurnCounter == 5:
-            #     return SpawnAction(HexPos(3,6))
-            # elif Agent.testTurnCounter == 6:
-            #     return SpawnAction(HexPos(3,5))
-            # else:
             bestMove = mcts.search(self.testBoard, timeLimit)
             return bestMove
         else:
@@ -109,33 +69,4 @@ class Agent:
         # print(tiles)
         # print(Agent.testBoard.getWinner())
         Agent.testTurnCounter += 1
-
-    def randomSpawn(self) -> HexPos:
-        # get Locations where Board is empty
-        emptyLocations = [key for key, value in Agent.testBoard.board.items() if value.colour is None]  # https://note.nkmk.me/en/python-dict-get-key-from-value/
-
-        if not emptyLocations:
-            return HexPos(0, 0)  # intentionally wrong. no more valid spaces
-
-        randomLocation = emptyLocations[random.randint(0, len(emptyLocations)-1)]  # gets random location from empty location list
-
-        return HexPos(randomLocation[0], randomLocation[1])
-
-    def randomSpread(self) -> (HexPos, HexDir):
-        # get Locations of current Player
-        locations = [key for key, value in Agent.testBoard.board.items() if value.colour is self._color]
-        # print(locations)
-
-        # choose random Location to Move
-        randomLocation = locations[random.randint(0, len(locations)-1)]  # gets random location from empty location list
-        # print(randomLocation)
-
-        # choose random Direction
-        randomDirection = random.choice(list(HexDir))
-        # print(randomDirection)
-
-        randomHex = HexPos(randomLocation[0], randomLocation[1])
-
-        return randomHex, randomDirection
-
 

@@ -11,7 +11,6 @@ class Piece:
         self.children = {}
 
     def __repr__(self):
-        # return f"({self.location.q},{self.location.r}, {self.colour}, {self.power})"
         return f"({self.colour},{self.power})"
 
 
@@ -55,7 +54,6 @@ class GameBoard:
                     nextHexLocation = nextNode.location.__add__(action.direction)
 
         self.numTurns += 1
-        # print(f"UpdateBoard: power={self.power}, moves={self.numTurns}, nextPlayer={self.getNextPlayer()}")
 
 
     def generateBoard(self):
@@ -64,11 +62,11 @@ class GameBoard:
             for q in range(constants.BOARD_N):
                 location = (r, q)
                 hexLocation = HexPos(r, q)
-                gameBoard[(r, q)] = Piece(hexLocation, None, 0)  # Placeholder/Empty Locations
+                gameBoard[(r, q)] = Piece(hexLocation, None, 0)
 
         return gameBoard
 
-    def getWinner(self) -> (bool, PlayerColor, int):  # !!!!! this the same as isTerminal? -> (terminal_state, winner)
+    def getWinner(self) -> (bool, PlayerColor, int):
         bluePower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.BLUE])
         redPower = sum([value.power for value in self.board.values() if value.colour is PlayerColor.RED])
         score = 0
@@ -139,6 +137,7 @@ class GameBoard:
     def smartSpread(self, colour):
         spreads = self.spreadOptions(self.getCurrentPlayer())
         opponentSpreadPieces = self.getOpponentNextPositions()
+        playerCells = [value.location for value in self.board.values() if value.colour is self.getCurrentPlayer()]
         smartSpreads = []
 
         for spread in spreads:
@@ -146,6 +145,14 @@ class GameBoard:
                 nextHexLocation = spread[0].__add__(spread[2])
                 if nextHexLocation not in opponentSpreadPieces:
                     smartSpreads.append(spread)
+                else:
+                    isAdjacent = False
+                    for direction in HexDir:
+                        adjacentCell = nextHexLocation.__add__(direction)
+                        if adjacentCell in playerCells and adjacentCell not in opponentSpreadPieces and adjacentCell != spread[0]:
+                            isAdjacent = True
+                    if isAdjacent:
+                        smartSpreads.append(spread)
             else:
                 smartSpreads.append(spread)
         if len(smartSpreads) == 0:
@@ -178,7 +185,7 @@ class GameBoard:
         else:
             return PlayerColor.RED
 
-    def getLegalMoves(self) -> Action:   # why are we doing so much processin? idk if we need to do any copying here, just do a random move coz that's all we need anyway
+    def getLegalMoves(self) -> Action:
         goodMoves = []
         moves = []  # GameBoards
 
@@ -188,23 +195,19 @@ class GameBoard:
             newBoard = copy.deepcopy(self) # use deepcopy instead of copy or else all the boards will be the same
             newBoard.updateBoard(nextPlayer, SpreadAction(spread[0], spread[2]))
 
-            # important for the report --> efficiency of the program
-            # currently only choosing the most recent guy -- want to determine the best choice out of the power increasing moves
             if newBoard.getPlayerPower(nextPlayer) > self.getPlayerPower(nextPlayer):
                 goodMoves.append((newBoard, SpreadAction(spread[0], spread[2])))
                 moves.append((newBoard, SpreadAction(spread[0], spread[2])))
             else:
                 moves.append((newBoard, SpreadAction(spread[0], spread[2])))
 
-        # print(self.spawnOptions())
+
         if self.power < 49:
             for spawn in self.spawnOptions():  # creates future boards
                 newBoard = copy.deepcopy(self)  # use deepcopy instead of copy or else all the boards will be the same
                 newBoard.updateBoard(nextPlayer, SpawnAction(spawn))
-                # goodMoves.append() if it fits some criteria
                 moves.append((newBoard, SpawnAction(spawn)))
-        # print(f"# GOOD MOVES: {len(goodMoves)}")
-        # print(f"# MOVES: {len(moves)}")
+
         if len(goodMoves) > 0:
             return goodMoves
         else:
